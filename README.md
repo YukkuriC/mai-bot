@@ -1,8 +1,13 @@
 # mai bot 使用指南
 
-此 README 提供了最低程度的 mai bot 教程与支持。
+~~此 README 提供了最低程度的 mai bot 教程与支持。~~  
+夺舍了，以后这个fork就是命令行工具了
 
-**建议您至少拥有一定的编程基础之后再尝试使用本工具。**
+## TODO
+* [ ] 劫持nonebot注册路径
+* [ ] 命令行与交互式指令解析
+* [ ] 合理的图片输出方式
+* [ ] 支持aqua服b50查询
 
 ## Step 1. 安装 Python
 
@@ -19,73 +24,14 @@
 > 资源文件仅供学习交流使用，请自觉在下载 24 小时内删除资源文件。
 
 在此之后，**您需要打开控制台，并切换到该项目所在的目录。**
-在 Windows 10 系统上，您可以直接在项目的根目录（即 bot.py）文件所在的位置按下 Shift + 右键，点击【在此处打开 PowerShell 窗口】。
-如果您使用的是更旧的操作系统（比如 Windows 7），请自行查找关于`Command Prompt`，`Powershell`以及`cd`命令的教程。
 
-之后，在打开的控制台中输入
-```
-python --version
-```
-控制台应该会打印出 Python 的版本。如果提示找不到 `python` 命令，请检查环境变量或干脆重装 Python，**并务必勾选 Add Python to system PATH**。
+1. 启动方式1：python bot.py <指令>，运行相应命令并在控制台中输出结果
 
-之后，输入
-```
-pip install -r requirements.txt
-```
-安装依赖完成后，运行
-```
-python bot.py
-```
-运行项目。如果输出如下所示的内容，代表运行成功：
-```
-08-02 11:26:48 [INFO] nonebot | NoneBot is initializing...
-08-02 11:26:48 [INFO] nonebot | Current Env: prod
-08-02 11:26:49 [INFO] nonebot | Succeeded to import "maimaidx"
-08-02 11:26:49 [INFO] nonebot | Succeeded to import "public"
-08-02 11:26:49 [INFO] nonebot | Running NoneBot...
-08-02 11:26:49 [INFO] uvicorn | Started server process [5268]
-08-02 11:26:49 [INFO] uvicorn | Waiting for application startup.
-08-02 11:26:49 [INFO] uvicorn | Application startup complete.
-08-02 11:26:49 [INFO] uvicorn | Uvicorn running on http://127.0.0.1:10219 (Press CTRL+C to quit)
-```
-**运行成功后请勿关闭此窗口，后续需要与 CQ-HTTP 连接。**
-
-## Step 3. 连接 CQ-HTTP
-
-前往 https://github.com/Mrs4s/go-cqhttp > Releases，下载适合自己操作系统的可执行文件。
-go-cqhttp 在初次启动时会询问代理方式，选择反向 websocket 代理即可。
-
-之后用任何文本编辑器打开`config.yml`文件，设置反向 ws 地址、上报方式：
-```yml
-message:
-  post-format: array
-  
-servers:
-  - ws-reverse:
-      universal: ws://127.0.0.1:10219/onebot/v11/ws
-```
-然后设置您的 QQ 号和密码。您也可以不设置密码，选择扫码登陆的方式。
-
-登陆成功后，后台应该会发送一条类似的信息：
-```
-08-02 11:50:51 [INFO] nonebot | WebSocket Connection from CQHTTP Bot 114514 Accepted!
-```
-至此，您可以和对应的 QQ 号聊天并使用 mai bot 的所有功能了。
-
-## FAQ
-
-不是 Windows 系统该怎么办？
-> 请自行查阅其他系统上的 Python 安装方式。cqhttp提供了其他系统的可执行文件，您也可以自行配置 golang module 环境进行编译。
-
-配置 nonebot 或 cq-http 过程中出错？
-> 请查阅 https://github.com/nonebot/nonebot2 以及 https://github.com/Mrs4s/go-cqhttp 中的文档。
-
-部分消息发不出来？
-> 被风控了。解决方式：换号或者让这个号保持登陆状态和一定的聊天频率，持续一段时间。
+1. 启动方式2：python bot.py打开交互式窗口，可在其中反复输入指令
 
 ## 说明
 
-本 bot 提供了如下功能：
+本 bot _即将_ 提供了如下功能：
 
 命令 | 功能
 --- | ---
