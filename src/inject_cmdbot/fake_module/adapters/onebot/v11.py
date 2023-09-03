@@ -14,13 +14,10 @@ class MessageSegment:
         return f'<{self.type},{self.data}>'
 
 
-class Message:
-
-    def __init__(self, msgs: list[MessageSegment]) -> None:
-        self.data = msgs
+class Message(list):
 
     def __repr__(self):
-        return repr(self.data)
+        return ''.join(map(str, self))
 
 
 Event = Bot = None

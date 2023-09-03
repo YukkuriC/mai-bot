@@ -99,7 +99,7 @@ async def handle_message(msg: str):
             filtered_msgs.append(msg)
             filtered_msgs.append('\n')
             continue
-        for seg in msg.data:
+        for seg in msg:
             if isinstance(seg, MessageSegment):
                 if seg.type == 'text':
                     seg = seg.data['text']
