@@ -67,7 +67,7 @@ DUMMY_BOT = None
 DUMMY_STATE = {}
 
 HTML_TEMPLATE = '''<html>
-<head><meta charset="utf-8"></head>
+<head><meta charset="utf-8"><title>{1}</title></head>
 <body><pre>{0}</pre></body></html>'''
 
 
@@ -75,13 +75,13 @@ def sort_priority():
     RULESETS.sort(key=lambda x: -x.priority)
 
 
-async def handle_message(msg: str):
+async def handle_message(input_msg: str):
     from nonebot.adapters.onebot.v11 import Message, MessageSegment
     replies: list[Message] = []
     for rule in RULESETS:
-        if rule.matcher(msg):
+        if rule.matcher(input_msg):
             await rule.process(event=DUMMY_EVENT,
-                               message=msg,
+                               message=input_msg,
                                bot=DUMMY_BOT,
                                state=DUMMY_STATE)
             rule.dump(replies)
@@ -121,7 +121,7 @@ async def handle_message(msg: str):
     if hasImg:
         tmp_path = os.path.join(tempfile.gettempdir(), 'tmp.html')
         with open(tmp_path, 'w', encoding='utf-8') as f:
-            print(HTML_TEMPLATE.format(msg_body), file=f)
+            print(HTML_TEMPLATE.format(msg_body, input_msg), file=f)
         os.system(tmp_path)
 
     # pure text
