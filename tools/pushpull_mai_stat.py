@@ -7,6 +7,10 @@ import os
 BASE_DIR = os.path.dirname(__file__)
 os.chdir(BASE_DIR)
 from cfg_reader import *
+from cache_access import CacheEntry
+
+dumper = CacheEntry.dump
+loader = CacheEntry.load
 
 if 'steps':
 
@@ -19,7 +23,7 @@ if 'steps':
                         'username': username,
                         'password': password
                     }) as login:
-                print(await login.text())
+                print(await login.json())
             async with session.get(
                     "https://www.diving-fish.com/api/maimaidxprober/player/records"
             ) as resp:
@@ -59,8 +63,7 @@ if 'steps':
             return oldv != setv
 
         def assignProberToAqua(proberData, aquaData):
-            with open('musicMap.json', 'r', encoding='utf-8') as f:
-                infoMap = json.load(f)
+            infoMap = loader('aquaMusicData')
 
             mapper = {}
             for record in aquaData['userMusicDetailList']:
@@ -68,13 +71,12 @@ if 'steps':
             for recordProber in proberData['records']:
                 # get aqua id
                 title = recordProber["title"]
-                isDx = recordProber["type"] == 'DX'
-                if not title in infoMap[isDx]:
+                if not title in infoMap[recordProber["type"]]:
                     print(f'missing: {title}')
                     continue
 
                 # get record
-                mid = infoMap[isDx][title]
+                mid = infoMap[recordProber["type"]][title]
                 diff = recordProber["level_index"]
                 mkey = (mid, diff)
                 create, update = False, False
@@ -102,37 +104,37 @@ if 'steps':
                         f"""{'Created' if create else 'Updated'}: {title} {diffmap[diff]} {recordAqua["achievement"]/10000}"""
                     )
 
+    # 4. upload to aqua
+    async def uploadAquaData(obj):
+        async with aiohttp.ClientSession() as session:
+            loc = f'http://localhost/api/game/maimai2/import'
+            async with session.post(loc, json=obj) as upload:
+                print(await upload.json())
+
 
 # separate stages with output
 if 'stages':
 
-    def dumper(path: str, obj):
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(obj, f, indent=4, ensure_ascii=0)
-
-    def loader(path: str):
-        with open(path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        return data
-
     async def stage1():
         data = await fetchProber()
-        dumper('prober.json', data)
+        dumper('prober', data)
         return data
 
     async def stage2():
         data = await fetchAqua()
-        dumper('aqua.json', data)
+        dumper('aqua', data)
         return data
 
-    async def stage3(dump=True):
-        print('Stage 3: merge data'.center(30, '='))
-        step1 = loader('prober.json')
-        step2 = loader('aqua.json')
+    async def stage3():
+        step1 = loader('prober')
+        step2 = loader('aqua')
         assignProberToAqua(step1, step2)
-        if dump:
-            dumper('output.json', step2)
+        dumper('output', step2)
         return step2
+
+    async def stage4():
+        step3 = loader('output')
+        await uploadAquaData(step3)
 
 
 # merge workflow
@@ -143,9 +145,8 @@ async def main():
     step2 = await fetchAqua()
     print('Step 3: merge data'.center(30, '='))
     assignProberToAqua(step1, step2)
-    with open('output.json', 'w', encoding='utf-8') as f:
-        json.dump(step2, f, separators=',:')
-    print('TODO Step 4: upload to aqua'.center(30, '='))
+    print('Step 4: upload to aqua'.center(30, '='))
+    await uploadAquaData(step2)
 
 
 if __name__ == '__main__':

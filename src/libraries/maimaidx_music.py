@@ -150,8 +150,16 @@ class MusicList(List[Music]):
             new_list.append(music)
         return new_list
 
+from cache import CacheEntry
 
-obj = requests.get('https://www.diving-fish.com/api/maimaidxprober/music_data').json()
+obj = CacheEntry.load('proberMusicData')
+if obj:
+    print('Exist prober music data')
+else:
+    obj = requests.get(
+        'https://www.diving-fish.com/api/maimaidxprober/music_data').json()
+    CacheEntry.dump('proberMusicData', obj)
+    print('Refreshed prober music data')
 total_list: MusicList = MusicList(obj)
 for __i in range(len(total_list)):
     total_list[__i] = Music(total_list[__i])
