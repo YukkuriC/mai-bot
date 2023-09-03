@@ -5,6 +5,12 @@ class MessageSegment:
         self.data = data
 
     def __repr__(self):
+        if self.type == 'image':
+            url = self.data['file']
+            if url.startswith('base64://'):
+                url = 'data:image/png;base64,' + url[9:]
+            return f'<img src="{url}">'
+
         return f'<{self.type},{self.data}>'
 
 

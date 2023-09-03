@@ -1,4 +1,4 @@
-import inspect
+import inspect, os, tempfile
 
 from .params import CommandArg, EventMessage
 
@@ -49,12 +49,6 @@ class CommandMatcher:
         self.messages = []
         for cmd in self.commands:
             msg = kw['message']
-            print(
-                type(cmd.msgType),
-                type(CommandArg),
-                type(cmd.msgType) == type(CommandArg),
-                cmd.msgType == CommandArg,
-            )
             if cmd.msgType == CommandArg:
                 msg = msg.split(' ', 1)
                 kw['message'] = msg[1] if len(msg) > 1 else ''
@@ -72,22 +66,64 @@ DUMMY_EVENT = None
 DUMMY_BOT = None
 DUMMY_STATE = {}
 
+HTML_TEMPLATE = '''<html>
+<head><meta charset="utf-8"></head>
+<body><pre>{0}</pre></body></html>'''
+
 
 def sort_priority():
     RULESETS.sort(key=lambda x: -x.priority)
 
 
 async def handle_message(msg: str):
-    replies = []
+    from nonebot.adapters.onebot.v11 import Message, MessageSegment
+    replies: list[Message] = []
     for rule in RULESETS:
         if rule.matcher(msg):
             await rule.process(event=DUMMY_EVENT,
                                message=msg,
                                bot=DUMMY_BOT,
                                state=DUMMY_STATE)
-            messages = rule.dump(replies)
+            rule.dump(replies)
 
             if rule.block:
                 break
 
-    print(replies)
+    # merge messages
+    hasImg = False
+    filtered_msgs = []
+
+    # first iter
+    for msg in replies:
+        if isinstance(msg, str):
+            filtered_msgs.append(msg)
+            filtered_msgs.append('\n')
+            continue
+        for seg in msg.data:
+            if isinstance(seg, MessageSegment):
+                if seg.type == 'text':
+                    seg = seg.data['text']
+                else:
+                    if seg.type == 'image':
+                        hasImg = True
+                    else:
+                        print('unsupported type:', seg.type)
+                    seg = f'\n{seg}\n'
+            filtered_msgs.append(seg)
+        filtered_msgs.append('\n')
+    else:
+        if filtered_msgs:
+            filtered_msgs.pop()
+
+    msg_body = ''.join(filtered_msgs)
+
+    # image html
+    if hasImg:
+        tmp_path = os.path.join(tempfile.gettempdir(), 'tmp.html')
+        with open(tmp_path, 'w', encoding='utf-8') as f:
+            print(HTML_TEMPLATE.format(msg_body), file=f)
+        os.system(tmp_path)
+
+    # pure text
+    else:
+        print(msg_body)
