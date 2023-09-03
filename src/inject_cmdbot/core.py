@@ -56,8 +56,8 @@ class CommandMatcher:
                 cmd.msgType == CommandArg,
             )
             if cmd.msgType == CommandArg:
-                msg = msg.split(' ', 1)[1]
-                kw['message'] = msg
+                msg = msg.split(' ', 1)
+                kw['message'] = msg[1] if len(msg) > 1 else ''
 
             kw_part = {k: v for k, v in kw.items() if k in cmd.kwSet}
             await cmd(**kw_part)
