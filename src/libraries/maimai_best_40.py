@@ -43,7 +43,7 @@ class ChartInfo(object):
         ri = rate.index(data["rate"])
         fc = ['', 'fc', 'fcp', 'ap', 'app']
         fi = fc.index(data["fc"])
-        return cls(
+        ret = cls(
             idNum=total_list.by_title(data["title"]).id,
             title=data["title"],
             diff=data["level_index"],
@@ -55,6 +55,8 @@ class ChartInfo(object):
             achievement=data["achievements"],
             tp=data["type"]
         )
+        ret.ra = computeRa(ret.ds, ret.achievement)
+        return ret
 
 
 
@@ -84,6 +86,10 @@ class BestList(object):
 
     def __getitem__(self, index):
         return self.data[index]
+
+    @property
+    def rating(self):
+        return sum(i.ra for i in self.data)
 
 
 class DrawBest(object):
@@ -401,5 +407,6 @@ async def generate(payload: Dict) -> (Optional[Image.Image], bool):
             sd_best.push(ChartInfo.from_json(c))
         for c in dx:
             dx_best.push(ChartInfo.from_json(c))
-        pic = DrawBest(sd_best, dx_best, obj["nickname"], obj["rating"] + obj["additional_rating"], obj["rating"]).getDir()
+        rating = sd_best.rating + dx_best.rating
+        pic = DrawBest(sd_best, dx_best, obj["nickname"], rating + 2000, rating).getDir()
         return pic, 0
