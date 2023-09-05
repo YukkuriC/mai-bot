@@ -280,6 +280,8 @@ async def _(event: Event, message: Message = CommandArg()):
     username = str(message).strip()
     if username == "":
         payload = {'qq': str(event.get_user_id())}
+    elif username.isdigit():
+        payload = {'qq': username, 'b50':True}
     else:
         payload = {'username': username}
     img, success = await generate(payload)
@@ -302,6 +304,8 @@ async def _(event: Event, message: Message = CommandArg()):
     username = str(message).strip()
     if username == "":
         payload = {'qq': str(event.get_user_id()),'b50':True}
+    elif username.isdigit():
+        payload = {'qq': username, 'b50':True}
     else:
         payload = {'username': username,'b50':  True}
     img, success = await generate50(payload)
