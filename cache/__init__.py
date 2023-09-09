@@ -3,6 +3,13 @@ import os, json
 HERE = os.path.dirname(__file__)
 
 
+def tryUseIntKey(obj):
+    if not isinstance(obj, dict):
+        return obj
+    return {(int(k) if k.lstrip('-').isdigit() else k): v
+            for k, v in obj.items()}
+
+
 class CacheEntry:
     _CACHED = {}
 
@@ -13,7 +20,7 @@ class CacheEntry:
             if not os.path.isfile(path):
                 return None
             with open(path, 'r', encoding='utf-8') as f:
-                cls._CACHED[name] = json.load(f)
+                cls._CACHED[name] = json.load(f, object_hook=tryUseIntKey)
         return cls._CACHED[name]
 
     @classmethod
