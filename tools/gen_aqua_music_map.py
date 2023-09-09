@@ -1,11 +1,11 @@
 import glob, os, json
 from xml.dom.minidom import parse
 
-os.sys.path.append(os.path.dirname(__file__))
 from cfg_reader import OPTION_ROOT
 from cache_access import CacheEntry
 
 sdMap, dxMap, versionMap, versionNameMap = {}, {}, [], []
+diffMap = {}
 
 
 def parseStrIdNode(node):
@@ -39,13 +39,25 @@ def readMusicFile(path):
     else:
         target[title] = musicId
 
+    diffList = [0] * 5
+    diffMap[musicId] = diffList
+    notesData = doc.getElementsByTagName('Notes')
+    for i in range(min(5, len(notesData))):
+        level = int(
+            notesData[i].getElementsByTagName('level')[0].firstChild.data)
+        levelSub = int(notesData[i].getElementsByTagName('levelDecimal')
+                       [0].firstChild.data)
+        diffList[i] = level + levelSub / 10
+
 
 for path in glob.glob(fr'{OPTION_ROOT}/*/Music/*/Music.xml'):
     readMusicFile(path)
 
-CacheEntry.dump('aquaMusicData', {
-    "SD": sdMap,
-    "DX": dxMap,
-    "version": versionMap,
-    "versionName": versionNameMap
-})
+CacheEntry.dump(
+    'aquaMusicData', {
+        "SD": sdMap,
+        "DX": dxMap,
+        "version": versionMap,
+        "versionName": versionNameMap,
+        'diff': diffMap
+    })
