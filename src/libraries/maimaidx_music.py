@@ -103,17 +103,40 @@ class Music(Dict):
 
 
 class MusicList(List[Music]):
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.idMap = {}
+        self.titleMap = {}
+        for i in range(len(self)):
+            self._addRef(i)
+
+    def __getitem__(self, i):
+        raw = super().__getitem__(i)
+        if not isinstance(raw, Music):
+            self[i] = raw = Music(raw)
+            for i in range(len(raw.charts)):
+                raw.charts[i] = Chart(raw.charts[i])
+        return raw
+
+    def _addRef(self, idx):
+        music = self[idx]
+        self.idMap[music.id] = music
+        self.titleMap[music.title] = music
+
+    def append(self, obj):
+        super().append(obj)
+        self._addRef(-1)
+
+    def insert(self, idx, obj):
+        super().insert(idx, obj)
+        self._addRef(idx)
+
     def by_id(self, music_id: str) -> Optional[Music]:
-        for music in self:
-            if music.id == music_id:
-                return music
-        return None
+        return self.idMap.get(music_id)
 
     def by_title(self, music_title: str) -> Optional[Music]:
-        for music in self:
-            if music.title == music_title:
-                return music
-        return None
+        return self.titleMap.get(music_title)
 
     def random(self):
         return random.choice(self)
@@ -161,7 +184,3 @@ else:
     CacheEntry.dump('proberMusicData', obj)
     print('Refreshed prober music data')
 total_list: MusicList = MusicList(obj)
-for __i in range(len(total_list)):
-    total_list[__i] = Music(total_list[__i])
-    for __j in range(len(total_list[__i].charts)):
-        total_list[__i].charts[__j] = Chart(total_list[__i].charts[__j])
