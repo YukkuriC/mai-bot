@@ -1,4 +1,4 @@
-import os, json
+import os, json, shelve
 
 HERE = os.path.dirname(__file__)
 
@@ -29,3 +29,20 @@ class CacheEntry:
         path = os.path.join(HERE, f'{name}.json')
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(obj, f, separators=',:', ensure_ascii=0)
+
+
+class CacheShelve:
+
+    @classmethod
+    def _getShelve(cls, name):
+        return shelve.open(os.path.join(HERE, name))
+
+    @classmethod
+    def get(cls, name, default=None, group='default'):
+        with cls._getShelve(group) as s:
+            return s.get(name, default)
+
+    @classmethod
+    def set(cls, name, value, group='default'):
+        with cls._getShelve(group) as s:
+            s[name] = value
