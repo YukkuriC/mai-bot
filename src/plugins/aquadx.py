@@ -1,7 +1,9 @@
 from nonebot import on_command
 from nonebot.params import CommandArg
-from src.libraries import aqua
+from src.libraries import aqua, aqua_best
+from src.libraries.image import *
 from cache import CacheShelve
+from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
 if 'shelve interface':
     K_USERID = 'aime_user_id'
@@ -55,3 +57,61 @@ async def _(message=CommandArg()):
     await h_aime.send(f'''Usage:
 1) "aime" to view current saved aime user id')
 2) "aime <code>" to query user id with access code & save to database''')
+
+
+h_b50 = on_command('aqua_b50', priority=114514)
+
+
+@h_b50.handle()
+async def _():
+    host = getAqua()
+    user = getUserId()
+
+    raw = await aqua_best.GenB50(host, user, sender=h_b50.send)
+    await h_b50.send(
+        Message([
+            MessageSegment("image", {
+                "file":
+                f"base64://{str(image_to_base64(raw), encoding='utf-8')}"
+            })
+        ]))
+
+
+h_b40 = on_command('aqua_b40', priority=114514)
+
+
+@h_b40.handle()
+async def _():
+    host = getAqua()
+    user = getUserId()
+
+    raw = await aqua_best.GenB40(host, user, sender=h_b50.send)
+    await h_b40.send(
+        Message([
+            MessageSegment("image", {
+                "file":
+                f"base64://{str(image_to_base64(raw), encoding='utf-8')}"
+            })
+        ]))
+
+    # username = str(message).strip()
+    # if username == "":
+    #     payload = {'qq': str(event.get_user_id())}
+    # elif username.isdigit():
+    #     payload = {'qq': username, 'b50': True}
+    # else:
+    #     payload = {'username': username}
+    # img, success = await generate(payload)
+    # if success == 400:
+    #     await best_40_pic.send("未找到此玩家，请确保此玩家的用户名和查分器中的用户名相同。")
+    # elif success == 403:
+    #     await best_40_pic.send("该用户禁止了其他人获取数据。")
+    # else:
+    #     await best_40_pic.send(
+    #         Message([
+    #             MessageSegment(
+    #                 "image", {
+    #                     "file":
+    #                     f"base64://{str(image_to_base64(img), encoding='utf-8')}"
+    #                 })
+    #         ]))

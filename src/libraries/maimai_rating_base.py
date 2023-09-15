@@ -66,8 +66,7 @@ def computeRa_b40(ds: float, achievement: float) -> int:
 class ChartInfo(object):
 
     def __init__(self, idNum: str, diff: int, tp: str, achievement: float,
-                 ra: int, comboId: int, scoreId: int, title: str, ds: float,
-                 lv: str):
+                 comboId: int, scoreId: int, title: str, ds: float, lv: str):
         self.idNum = idNum
         self.diff = diff
         self.tp = tp
