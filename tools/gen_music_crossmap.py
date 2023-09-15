@@ -3,6 +3,13 @@ from cache_access import CacheEntry
 proberData = CacheEntry.load('proberMusicData')
 aquaData = CacheEntry.load('aquaMusicData')
 
+if not proberData:
+    import gen_prober_music_data
+    proberData = CacheEntry.load('proberMusicData')
+if not aquaData:
+    import gen_aqua_music_map
+    aquaData = CacheEntry.load('aquaMusicData')
+
 targets = {}, {}, [], []
 p2a, a2p, pOnly, aOnly = targets
 
