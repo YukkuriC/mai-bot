@@ -8,7 +8,7 @@ import aiohttp
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from src.libraries.maimaidx_music import get_cover_len5_id
 
-from .maimai_rating_base import BestList, genChartInfo
+from .maimai_rating_base import BestList, ChartInfo
 
 scoreRank = 'D C B BB BBB A AA AAA S S+ SS SS+ SSS SSS+'.split(' ')
 combo = ' FC FC+ AP AP+'.split(' ')
@@ -160,7 +160,7 @@ class DrawBest(object):
                 comboImg = self._resizePic(comboImg, 0.45)
                 temp.paste(comboImg, (119, 27), comboImg.split()[3])
             font = ImageFont.truetype('src/static/adobe_simhei.otf', 12, encoding='utf-8')
-            tempDraw.text((8, 44), f'Base: {chartInfo.ds} -> {chartInfo.ra}', 'white', font)
+            tempDraw.text((8, 44), f'Base: {chartInfo.ds} -> {chartInfo.ra_b40}', 'white', font)
             font = ImageFont.truetype('src/static/adobe_simhei.otf', 18, encoding='utf-8')
             tempDraw.text((8, 60), f'#{num + 1}', 'white', font)
 
@@ -283,37 +283,6 @@ class DrawBest(object):
         return self.img
 
 
-def computeRa(ds: float, achievement:float) -> int:
-    baseRa = 14.0
-    if achievement >= 50 and achievement < 60:
-        baseRa = 5.0
-    elif achievement < 70:
-        baseRa = 6.0
-    elif achievement < 75:
-        baseRa = 7.0
-    elif achievement < 80:
-        baseRa = 7.5
-    elif achievement < 90:
-        baseRa = 8.0
-    elif achievement < 94:
-        baseRa = 9.0
-    elif achievement < 97:
-        baseRa = 10
-    elif achievement < 98:
-        baseRa = 12.5
-    elif achievement < 99:
-        baseRa = 12.7
-    elif achievement < 99.5:
-        baseRa = 13.0
-    elif achievement < 100:
-        baseRa = 13.2
-    elif achievement < 100.5:
-        baseRa = 13.5
-
-    return math.floor(ds * (min(100.5, achievement) / 100) * baseRa)
-
-
-ChartInfo = genChartInfo(computeRa)
 
 async def generate(payload: Dict) -> Tuple[Optional[Image.Image], bool]:
     async with aiohttp.request("POST", "https://www.diving-fish.com/api/maimaidxprober/query/player", json=payload) as resp:
@@ -330,6 +299,6 @@ async def generate(payload: Dict) -> Tuple[Optional[Image.Image], bool]:
             sd_best.push(ChartInfo.from_json(c))
         for c in dx:
             dx_best.push(ChartInfo.from_json(c))
-        rating = sd_best.rating + dx_best.rating
+        rating = sd_best.rating_b40 + dx_best.rating_b40
         pic = DrawBest(sd_best, dx_best, obj["nickname"], rating + 2000, rating).getDir()
         return pic, 0
