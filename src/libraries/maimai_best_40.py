@@ -2,94 +2,17 @@
 import asyncio
 import os
 import math
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Tuple
 
 import aiohttp
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
-from src.libraries.maimaidx_music import get_cover_len5_id, total_list
+from src.libraries.maimaidx_music import get_cover_len5_id
 
+from .maimai_rating_base import BestList, genChartInfo
 
 scoreRank = 'D C B BB BBB A AA AAA S S+ SS SS+ SSS SSS+'.split(' ')
 combo = ' FC FC+ AP AP+'.split(' ')
 diffs = 'Basic Advanced Expert Master Re:Master'.split(' ')
-
-
-class ChartInfo(object):
-    def __init__(self, idNum:str, diff:int, tp:str, achievement:float, ra:int, comboId:int, scoreId:int,
-                 title:str, ds:float, lv:str):
-        self.idNum = idNum
-        self.diff = diff
-        self.tp = tp
-        self.achievement = achievement
-        self.ra = ra
-        self.comboId = comboId
-        self.scoreId = scoreId
-        self.title = title
-        self.ds = ds
-        self.lv = lv
-
-    def __str__(self):
-        return '%-50s' % f'{self.title} [{self.tp}]' + f'{self.ds}\t{diffs[self.diff]}\t{self.ra}'
-
-    def __eq__(self, other):
-        return self.ra == other.ra
-
-    def __lt__(self, other):
-        return self.ra < other.ra
-
-    @classmethod
-    def from_json(cls, data):
-        rate = ['d', 'c', 'b', 'bb', 'bbb', 'a', 'aa', 'aaa', 's', 'sp', 'ss', 'ssp', 'sss', 'sssp']
-        ri = rate.index(data["rate"])
-        fc = ['', 'fc', 'fcp', 'ap', 'app']
-        fi = fc.index(data["fc"])
-        ret = cls(
-            idNum=total_list.by_title(data["title"]).id,
-            title=data["title"],
-            diff=data["level_index"],
-            ra=data["ra"],
-            ds=data["ds"],
-            comboId=fi,
-            scoreId=ri,
-            lv=data["level"],
-            achievement=data["achievements"],
-            tp=data["type"]
-        )
-        ret.ra = computeRa(ret.ds, ret.achievement)
-        return ret
-
-
-
-class BestList(object):
-
-    def __init__(self, size:int):
-        self.data = []
-        self.size = size
-
-    def push(self, elem:ChartInfo):
-        if len(self.data) >= self.size and elem < self.data[-1]:
-            return
-        self.data.append(elem)
-        self.data.sort()
-        self.data.reverse()
-        while(len(self.data) > self.size):
-            del self.data[-1]
-
-    def pop(self):
-        del self.data[-1]
-
-    def __str__(self):
-        return '[\n\t' + ', \n\t'.join([str(ci) for ci in self.data]) + '\n]'
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, index):
-        return self.data[index]
-
-    @property
-    def rating(self):
-        return sum(i.ra for i in self.data)
 
 
 class DrawBest(object):
@@ -390,7 +313,9 @@ def computeRa(ds: float, achievement:float) -> int:
     return math.floor(ds * (min(100.5, achievement) / 100) * baseRa)
 
 
-async def generate(payload: Dict) -> (Optional[Image.Image], bool):
+ChartInfo = genChartInfo(computeRa)
+
+async def generate(payload: Dict) -> Tuple[Optional[Image.Image], bool]:
     async with aiohttp.request("POST", "https://www.diving-fish.com/api/maimaidxprober/query/player", json=payload) as resp:
         if resp.status == 400:
             return None, 400
