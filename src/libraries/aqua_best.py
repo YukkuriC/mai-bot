@@ -1,4 +1,4 @@
-from .aqua import queryMusic
+from .aqua import queryMusic, queryNickname
 from .maimai_rating_base import ChartInfo, BestList
 from cache import CacheEntry
 from .maimai_best_50 import DrawBest
@@ -96,12 +96,21 @@ async def GetAquaLists(host,
     return blOld, blNew
 
 
+async def GetUserNickname(host, userId):
+    try:
+        raw = await queryNickname(host, userId)
+        print(raw)
+        return raw['userName']
+    except:
+        return str(userId)
+
+
 async def GenB50(host, userId, sender=NULL_AWAIT):
     data = await GetAquaLists(host, userId, sender=sender)
     if not data:
         return data
 
-    pic = DrawBest(*data, str(userId)).getDir()
+    pic = DrawBest(*data, await GetUserNickname(host, userId)).getDir()
     return pic
 
 
@@ -110,5 +119,6 @@ async def GenB40(host, userId, sender=NULL_AWAIT):
     if not data:
         return data
 
-    pic = DrawBest_B40(*data, str(userId), 2000).getDir()
+    pic = DrawBest_B40(*data, await GetUserNickname(host, userId),
+                       2000).getDir()
     return pic
