@@ -110,6 +110,5 @@ async def GenB40(host, userId, sender=NULL_AWAIT):
     if not data:
         return data
 
-    rating = data[0].rating_b40 + data[1].rating_b40
-    pic = DrawBest_B40(*data, str(userId), rating + 2000, rating).getDir()
+    pic = DrawBest_B40(*data, str(userId), 2000).getDir()
     return pic

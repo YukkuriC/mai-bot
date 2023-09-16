@@ -1,3 +1,4 @@
+import os
 from PIL import Image
 from src.libraries.maimaidx_music import get_cover_len5_id, total_list
 
@@ -101,7 +102,6 @@ class ChartInfo(object):
         ret = cls(idNum=total_list.by_title(data["title"]).id,
                   title=data["title"],
                   diff=data["level_index"],
-                  ra=data["ra"],
                   ds=data["ds"],
                   comboId=fi,
                   scoreId=ri,
@@ -148,6 +148,19 @@ class BestList(object):
 
 
 class DrawBestBase():
+
+    def __init__(self, sdBest: BestList, dxBest: BestList, userName: str):
+        self.sdBest = sdBest
+        self.dxBest = dxBest
+        self.userName = self._stringQ2B(userName)
+        self.pic_dir = 'src/static/mai/pic/'
+        self.cover_dir = 'src/static/mai/cover/'
+        self.cover_dir_aqua = 'src/static/mai/cover_aqua/'
+        self.img = Image.open(self.pic_dir +
+                              'UI_TTR_BG_Base_Plus.png').convert('RGBA')
+        self.ROWS_IMG = [2]
+        for i in range(6):
+            self.ROWS_IMG.append(116 + 96 * i)
 
     def _Q2B(self, uchar):
         """单个字符 全角转半角"""
@@ -215,3 +228,11 @@ class DrawBestBase():
 
     def getDir(self):
         return self.img
+
+    def _getMusicCover(self, idNum):
+        pngPath = self.cover_dir + f'{get_cover_len5_id(idNum)}.png'
+        if not os.path.exists(pngPath):
+            pngPath = self.cover_dir_aqua + f'UI_Jacket_{-int(idNum):06d}.png'
+        if not os.path.exists(pngPath):
+            pngPath = self.cover_dir + '01000.png'
+        return pngPath

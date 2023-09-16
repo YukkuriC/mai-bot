@@ -17,19 +17,11 @@ diffs = 'Basic Advanced Expert Master Re:Master'.split(' ')
 
 class DrawBest(DrawBestBase):
 
-    def __init__(self, sdBest:BestList, dxBest:BestList, userName:str, playerRating:int, musicRating:int):
-        self.sdBest = sdBest
-        self.dxBest = dxBest
-        self.userName = self._stringQ2B(userName)
-        self.playerRating = playerRating
-        self.musicRating = musicRating
-        self.rankRating = self.playerRating - self.musicRating
-        self.pic_dir = 'src/static/mai/pic/'
-        self.cover_dir = 'src/static/mai/cover/'
-        self.img = Image.open(self.pic_dir + 'UI_TTR_BG_Base_Plus.png').convert('RGBA')
-        self.ROWS_IMG = [2]
-        for i in range(6):
-            self.ROWS_IMG.append(116 + 96 * i)
+    def __init__(self, sdBest:BestList, dxBest:BestList, userName:str, rankRating:int):
+        super().__init__(sdBest, dxBest, userName)
+        self.musicRating = self.sdBest.rating_b40 + self.dxBest.rating_b40
+        self.rankRating = rankRating
+        self.playerRating = self.musicRating + self.rankRating
         self.COLOUMS_IMG = []
         for i in range(6):
             self.COLOUMS_IMG.append(2 + 172 * i)
@@ -72,9 +64,7 @@ class DrawBest(DrawBestBase):
             i = num // 5
             j = num % 5
             chartInfo = sdBest[num]
-            pngPath = self.cover_dir + f'{get_cover_len5_id(chartInfo.idNum)}.png'
-            if not os.path.exists(pngPath):
-                pngPath = self.cover_dir + '01000.png'
+            pngPath = self._getMusicCover(chartInfo.idNum)
             temp = Image.open(pngPath).convert('RGB')
             temp = self._resizePic(temp, itemW / temp.size[0])
             temp = temp.crop((0, (temp.size[1] - itemH) / 2, itemW, (temp.size[1] + itemH) / 2))
@@ -119,9 +109,7 @@ class DrawBest(DrawBestBase):
             i = num // 3
             j = num % 3
             chartInfo = dxBest[num]
-            pngPath = self.cover_dir + f'{get_cover_len5_id(chartInfo.idNum)}.png'
-            if not os.path.exists(pngPath):
-                pngPath = self.cover_dir + '01000.png'
+            pngPath = self._getMusicCover(chartInfo.idNum)
             temp = Image.open(pngPath).convert('RGB')
             temp = self._resizePic(temp, itemW / temp.size[0])
             temp = temp.crop((0, (temp.size[1] - itemH) / 2, itemW, (temp.size[1] + itemH) / 2))
@@ -234,6 +222,5 @@ async def generate(payload: Dict) -> Tuple[Optional[Image.Image], bool]:
             sd_best.push(ChartInfo.from_json(c))
         for c in dx:
             dx_best.push(ChartInfo.from_json(c))
-        rating = sd_best.rating_b40 + dx_best.rating_b40
-        pic = DrawBest(sd_best, dx_best, obj["nickname"], rating + 2000, rating).getDir()
+        pic = DrawBest(sd_best, dx_best, obj["nickname"], 2000).getDir()
         return pic, 0

@@ -17,20 +17,10 @@ diffs = 'Basic Advanced Expert Master Re:Master'.split(' ')
 class DrawBest(DrawBestBase):
 
     def __init__(self, sdBest:BestList, dxBest:BestList, userName:str):
-        self.sdBest = sdBest
-        self.dxBest = dxBest
-        self.userName = self._stringQ2B(userName)
-        self.sdRating = 0
-        self.dxRating = 0
+        super().__init__(sdBest, dxBest, userName)
         self.sdRating = sdBest.rating
         self.dxRating = dxBest.rating
         self.playerRating = self.sdRating + self.dxRating
-        self.pic_dir = 'src/static/mai/pic/'
-        self.cover_dir = 'src/static/mai/cover/'
-        self.img = Image.open(self.pic_dir + 'UI_TTR_BG_Base_Plus.png').convert('RGBA')
-        self.ROWS_IMG = [2]
-        for i in range(6):
-            self.ROWS_IMG.append(116 + 96 * i)
         self.COLOUMS_IMG = []
         for i in range(8):
             self.COLOUMS_IMG.append(2 + 138 * i)
@@ -73,9 +63,7 @@ class DrawBest(DrawBestBase):
             i = num // 7
             j = num % 7
             chartInfo = sdBest[num]
-            pngPath = self.cover_dir + f'{get_cover_len5_id(chartInfo.idNum)}.png'
-            if not os.path.exists(pngPath):
-                pngPath = self.cover_dir + '01000.png'
+            pngPath = self._getMusicCover(chartInfo.idNum)
             temp = Image.open(pngPath).convert('RGB')
             temp = self._resizePic(temp, itemW / temp.size[0])
             temp = temp.crop((0, (temp.size[1] - itemH) / 2, itemW, (temp.size[1] + itemH) / 2))
@@ -120,9 +108,7 @@ class DrawBest(DrawBestBase):
             i = num // 3
             j = num % 3
             chartInfo = dxBest[num]
-            pngPath = self.cover_dir + f'{get_cover_len5_id(chartInfo.idNum)}.png'
-            if not os.path.exists(pngPath):
-                pngPath = self.cover_dir + '01000.png'
+            pngPath = self._getMusicCover(chartInfo.idNum)
             temp = Image.open(pngPath).convert('RGB')
             temp = self._resizePic(temp, itemW / temp.size[0])
             temp = temp.crop((0, (temp.size[1] - itemH) / 2, itemW, (temp.size[1] + itemH) / 2))
