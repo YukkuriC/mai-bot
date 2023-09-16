@@ -93,25 +93,3 @@ async def _():
                 f"base64://{str(image_to_base64(raw), encoding='utf-8')}"
             })
         ]))
-
-    # username = str(message).strip()
-    # if username == "":
-    #     payload = {'qq': str(event.get_user_id())}
-    # elif username.isdigit():
-    #     payload = {'qq': username, 'b50': True}
-    # else:
-    #     payload = {'username': username}
-    # img, success = await generate(payload)
-    # if success == 400:
-    #     await best_40_pic.send("未找到此玩家，请确保此玩家的用户名和查分器中的用户名相同。")
-    # elif success == 403:
-    #     await best_40_pic.send("该用户禁止了其他人获取数据。")
-    # else:
-    #     await best_40_pic.send(
-    #         Message([
-    #             MessageSegment(
-    #                 "image", {
-    #                     "file":
-    #                     f"base64://{str(image_to_base64(img), encoding='utf-8')}"
-    #                 })
-    #         ]))

@@ -61,8 +61,9 @@ async def GetAquaLists(host,
     newMap = aquaData['version'][new_id]
     for unit in data:
         aquaId = unit['musicId']
+        aquaId_cover = aquaId % 10000
         if aquaId in crossMap['aOnly']:
-            proberId = 11513
+            proberId = -aquaId_cover
         else:
             proberId = crossMap['a2p'].get(aquaId, aquaId)
 
@@ -89,7 +90,6 @@ async def GetAquaLists(host,
         else:
             lstOld.append(chart)
 
-    print(old, new)
     blOld, blNew = BestList(old), BestList(new)
     blOld.data = sorted(lstOld, reverse=1)[:old]
     blNew.data = sorted(lstNew, reverse=1)[:new]
