@@ -7,7 +7,7 @@ import os
 BASE_DIR = os.path.dirname(__file__)
 os.chdir(BASE_DIR)
 from cfg_reader import *
-from cache_access import CacheEntry
+from cache_access import CacheEntry, ensure_cache
 
 dumper = CacheEntry.dump
 loader = CacheEntry.load
@@ -63,7 +63,7 @@ if 'steps':
             return oldv != setv
 
         def assignProberToAqua(proberData, aquaData):
-            infoMap = loader('aquaMusicData')
+            infoMap = ensure_cache('aquaMusicData', 'gen_aqua_music_map')
 
             mapper = {}
             for record in aquaData['userMusicDetailList']:

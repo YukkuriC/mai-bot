@@ -1,14 +1,7 @@
-from cache_access import CacheEntry
+from cache_access import CacheEntry, ensure_cache
 
-proberData = CacheEntry.load('proberMusicData')
-aquaData = CacheEntry.load('aquaMusicData')
-
-if not proberData:
-    import gen_prober_music_data
-    proberData = CacheEntry.load('proberMusicData')
-if not aquaData:
-    import gen_aqua_music_map
-    aquaData = CacheEntry.load('aquaMusicData')
+proberData = ensure_cache('proberMusicData', 'gen_prober_music_data')
+aquaData = ensure_cache('aquaMusicData', 'gen_aqua_music_map')
 
 targets = {}, {}, [], []
 p2a, a2p, pOnly, aOnly = targets
