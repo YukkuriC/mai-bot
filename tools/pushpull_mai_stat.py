@@ -99,7 +99,7 @@ if 'steps':
                 setter("scoreRank", rankmap.index(recordProber["rate"]))
 
                 # log
-                if create or update:
+                if (create or update) and diff >= 3:
                     print(
                         f"""{'Created' if create else 'Updated'}: {title} {diffmap[diff]} {recordAqua["achievement"]/10000}"""
                     )

@@ -1,0 +1,3 @@
+python gen_aqua_music_map.py
+python pick_aqua_music_cover.py
+python gen_music_crossmap.py
