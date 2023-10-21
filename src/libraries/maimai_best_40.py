@@ -17,7 +17,11 @@ diffs = 'Basic Advanced Expert Master Re:Master'.split(' ')
 
 class DrawBest(DrawBestBase):
 
-    def __init__(self, sdBest:BestList, dxBest:BestList, userName:str, rankRating:int):
+    def __init__(self,
+                 sdBest: BestList,
+                 dxBest: BestList,
+                 userName: str,
+                 rankRating=2000):
         super().__init__(sdBest, dxBest, userName)
         self.musicRating = self.sdBest.rating_b40 + self.dxBest.rating_b40
         self.rankRating = rankRating

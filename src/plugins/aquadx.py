@@ -1,5 +1,5 @@
-from nonebot import on_command
-from nonebot.params import CommandArg
+from nonebot import on_command, on_regex
+from nonebot.params import CommandArg, EventMessage
 from src.libraries import aqua, aqua_best
 from src.libraries.image import *
 from cache import CacheShelve
@@ -59,34 +59,21 @@ async def _(message=CommandArg()):
 2) "aime <code>" to query user id with access code & save to database''')
 
 
-h_b50 = on_command('aqua_b50', priority=114514)
+h_b40_b50 = on_regex(r'aqua_b[45]0', priority=114514)
 
 
-@h_b50.handle()
-async def _():
+@h_b40_b50.handle()
+async def _(message=EventMessage()):
     host = getAqua()
     user = getUserId()
 
-    raw = await aqua_best.GenB50(host, user, sender=h_b50.send)
-    await h_b50.send(
-        Message([
-            MessageSegment("image", {
-                "file":
-                f"base64://{str(image_to_base64(raw), encoding='utf-8')}"
-            })
-        ]))
-
-
-h_b40 = on_command('aqua_b40', priority=114514)
-
-
-@h_b40.handle()
-async def _():
-    host = getAqua()
-    user = getUserId()
-
-    raw = await aqua_best.GenB40(host, user, sender=h_b50.send)
-    await h_b40.send(
+    all_args = str(message).split()
+    raw = await aqua_best.GenBest(host,
+                                  user,
+                                  is_b40=all_args[0] == 'aqua_b40',
+                                  sender=h_b40_b50.send,
+                                  extra_args=all_args[1:])
+    await h_b40_b50.send(
         Message([
             MessageSegment("image", {
                 "file":

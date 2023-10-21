@@ -40,7 +40,13 @@ async def GetAquaLists(host,
                        old=35,
                        new=15,
                        new_id=-1,
-                       sender=NULL_AWAIT):
+                       sender=NULL_AWAIT,
+                       flags=[],
+                       predicates=[]):
+    '''
+        supported flags: noVersion
+    '''
+
     # check metadata
     if not (crossMap := GetCrossMap()):
         await sender("missing crossmap, run tools/gen_music_crossmap.py first")
@@ -85,14 +91,27 @@ async def GetAquaLists(host,
             ds=ds,
             lv=str(int(ds)) + ('+' if ds - int(ds) >= 0.7 else ''),
         )
-        if aquaId in newMap:
+
+        # filter & flags
+        for p in predicates:
+            if not p(chart):
+                continue
+
+        if 'noversion' in flags or aquaId in newMap:
             lstNew.append(chart)
         else:
             lstOld.append(chart)
 
-    blOld, blNew = BestList(old), BestList(new)
-    blOld.data = sorted(lstOld, reverse=1)[:old]
-    blNew.data = sorted(lstNew, reverse=1)[:new]
+    if 'noversion' in flags:
+        lstNew.sort(reverse=1)
+        blOld, blNew = BestList(old), BestList(new)
+        blOld.data = lstNew[:old]
+        blNew.data = lstNew[old:old + new]
+    else:
+        blOld, blNew = BestList(old), BestList(new)
+        blOld.data = sorted(lstOld, reverse=1)[:old]
+        blNew.data = sorted(lstNew, reverse=1)[:new]
+
     return blOld, blNew
 
 
@@ -105,20 +124,26 @@ async def GetUserNickname(host, userId):
         return str(userId)
 
 
-async def GenB50(host, userId, sender=NULL_AWAIT):
-    data = await GetAquaLists(host, userId, sender=sender)
+def _splitArgs(args):
+    args = [x.lower() for x in args]
+    # TODO split predicates
+    return args, []
+
+
+async def GenBest(host, userId, is_b40, sender=NULL_AWAIT, extra_args=[]):
+    flags, predicates = _splitArgs(extra_args)
+    kwargs, drawing = {}, DrawBest
+    if is_b40:
+        kwargs['old'] = 25
+        drawing = DrawBest_B40
+    data = await GetAquaLists(host,
+                              userId,
+                              sender=sender,
+                              flags=flags,
+                              predicates=predicates,
+                              **kwargs)
     if not data:
         return data
 
-    pic = DrawBest(*data, await GetUserNickname(host, userId)).getDir()
-    return pic
-
-
-async def GenB40(host, userId, sender=NULL_AWAIT):
-    data = await GetAquaLists(host, userId, old=25, sender=sender)
-    if not data:
-        return data
-
-    pic = DrawBest_B40(*data, await GetUserNickname(host, userId),
-                       2000).getDir()
+    pic = drawing(*data, await GetUserNickname(host, userId)).getDir()
     return pic
