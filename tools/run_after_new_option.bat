@@ -1,4 +1,4 @@
 python gen_aqua_music_map.py
-python gen_prober_music_data.py
 python gen_music_crossmap.py
 python pick_aqua_music_cover.py
+pause

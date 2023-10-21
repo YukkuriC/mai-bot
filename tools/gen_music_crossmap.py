@@ -5,6 +5,7 @@ aquaData = ensure_cache('aquaMusicData', 'gen_aqua_music_map')
 
 targets = {}, {}, [], []
 p2a, a2p, pOnly, aOnly = targets
+same_ids = set()
 
 for music in proberData:
     proberId = int(music['id'])
@@ -19,10 +20,11 @@ for music in proberData:
         p2a[proberId] = aquaId
         a2p[aquaId] = proberId
     else:
+        same_ids.add(proberId)
         print('same:', proberId, proberTitle)
 
 for mid in aquaData['diff'].keys():
-    if not mid in a2p:
+    if mid not in a2p and mid not in same_ids:
         aOnly.append(mid)
 
 output = {k: v for k, v in locals().items() if v in targets}

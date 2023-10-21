@@ -1,0 +1,3 @@
+python gen_prober_music_data.py
+python gen_music_crossmap.py
+pause
