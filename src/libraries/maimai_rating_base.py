@@ -69,7 +69,7 @@ class ChartInfo(object):
 
     def __init__(self, idNum: str, diff: int, tp: str, achievement: float,
                  comboId: int, scoreId: int, title: str, ds: float, lv: str):
-        self.idNum = idNum
+        self.idNum = int(idNum)
         self.diff = diff
         self.tp = tp
         self.achievement = achievement

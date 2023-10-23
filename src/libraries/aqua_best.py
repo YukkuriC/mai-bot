@@ -3,6 +3,7 @@ from .maimai_rating_base import ChartInfo, BestList
 from cache import CacheEntry
 from .maimai_best_50 import DrawBest
 from .maimai_best_40 import DrawBest as DrawBest_B40
+import re
 
 
 async def NULL_AWAIT(*a, **kw):
@@ -89,13 +90,17 @@ async def GetAquaLists(host,
             scoreId=unit['scoreRank'],
             title=aquaData['id2title'].get(aquaId, f'Title#{aquaId}'),
             ds=ds,
-            lv=str(int(ds)) + ('+' if ds - int(ds) >= 0.7 else ''),
+            lv=str(int(ds)) + ('+' if ds - int(ds) - 0.7 >= -1e-5 else ''),
         )
 
         # filter & flags
+        pass_test = True
         for p in predicates:
             if not p(chart):
+                pass_test = False
                 continue
+        if not pass_test:
+            continue
 
         if 'noversion' in flags or aquaId in newMap:
             lstNew.append(chart)
@@ -124,10 +129,81 @@ async def GetUserNickname(host, userId):
         return str(userId)
 
 
-def _splitArgs(args):
-    args = [x.lower() for x in args]
-    # TODO split predicates
-    return args, []
+if 'parse extra args':
+    FOO_CHART = ChartInfo('666', 5, 'DX', 114.514, 3, 5, 'YJSP', 1919.810,
+                          '15+')
+
+    FIELD_ALIAS = [
+        ['idNum', ['id']],
+        ['achievement', ['result']],
+        ['ra', ['rating']],
+        ['comboId', ['comboid']],
+        ['scoreId', ['scoreid']],
+        ['title', ['name']],
+        ['lv', ['level']],
+    ]
+    FIELD_ALIAS_MAP = {}
+    for orig, aliases in FIELD_ALIAS:
+        for a in aliases:
+            FIELD_ALIAS_MAP[a] = orig
+
+    PREDICATE_REGEX = re.compile(r'(\w+)([<>=]+)(\w+)')
+
+    LEVEL_TRANS = lambda lvStr: float(lvStr.replace('+', '.5'))
+
+    def _genCmp(field, op, val: str):
+        if field == 'lv':
+            val = LEVEL_TRANS(val)
+            return lambda c: eval(f'{LEVEL_TRANS(c.lv)}{op}{val}')
+
+        def cmp_both(c):
+            raw = getattr(c, field)
+            try:
+                return eval(f'{str(raw)}{op}{str(val)}')
+            except:
+                return eval(f'{repr(raw)}{op}{repr(val)}')
+
+        return cmp_both
+
+    def _splitArgs(args):
+        args = [x.lower() for x in args]
+
+        flags, predicates = [], []
+        # split predicates
+        for raw in args:
+            is_predicate = False
+            matcher = PREDICATE_REGEX.match(raw)
+            if matcher:
+                field, op, val = matcher.groups()
+                field = FIELD_ALIAS_MAP.get(field, field)
+
+                try:
+                    func = _genCmp(field, op, val)
+                    func(FOO_CHART)
+                except Exception as e:
+                    pass
+                else:
+                    is_predicate = True
+
+            else:  # special flags
+                is_predicate = True
+                if raw == 'fc':
+                    func = lambda c: c.comboId > 0
+                elif raw in ('fc+', 'fcp'):
+                    func = lambda c: c.comboId > 1
+                elif raw == 'ap':
+                    func = lambda c: c.comboId > 2
+                elif raw in ('ap+', 'app'):
+                    func = lambda c: c.comboId > 3
+                else:
+                    is_predicate = False
+
+            if is_predicate:
+                predicates.append(func)
+            else:
+                flags.append(raw)
+
+        return flags, predicates
 
 
 async def GenBest(host, userId, is_b40, sender=NULL_AWAIT, extra_args=[]):
