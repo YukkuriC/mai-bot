@@ -14,6 +14,15 @@ def parseStrIdNode(node):
     return id, str
 
 
+def readVersionFile(path):
+    doc = parse(path).documentElement
+    id, name = parseStrIdNode(doc.getElementsByTagName('name')[0])
+    while len(versionMap) <= id:
+        versionMap.append([])
+        versionNameMap.append(None)
+    versionNameMap[id] = name
+
+
 def readMusicFile(path):
     musicId = int(os.path.basename(os.path.dirname(path))[5:])
     isDx = musicId // 10000 > 0
@@ -22,12 +31,11 @@ def readMusicFile(path):
     assert musicId == id2
 
     vid, vname = parseStrIdNode(doc.getElementsByTagName('AddVersion')[0])
-    if vid not in versionMap:
-        while len(versionNameMap) < vid + 1:
-            versionMap.append([])
-            versionNameMap.append(None)
-        versionNameMap[vid] = vname
-    versionMap[vid].append(musicId)
+    try:
+        pool = versionMap[vid]
+    except:
+        pool = versionMap[-1]
+    pool.append(musicId)
 
     if musicId == 383:
         title = 'Link(CoF)'
@@ -49,6 +57,9 @@ def readMusicFile(path):
                        [0].firstChild.data)
         diffList[i] = level + levelSub / 10
 
+
+for path in glob.glob(fr'{OPTION_ROOT}/*/musicVersion/*/MusicVersion.xml'):
+    readVersionFile(path)
 
 for path in glob.glob(fr'{OPTION_ROOT}/*/Music/*/Music.xml'):
     readMusicFile(path)
