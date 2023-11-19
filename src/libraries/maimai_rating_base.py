@@ -88,6 +88,10 @@ class ChartInfo(object):
         return self.ra == other.ra
 
     def __lt__(self, other):
+        if self.ra == other.ra:
+            if self.ds == other.ds:
+                return self.achievement < other.achievement
+            return self.ds < other.ds
         return self.ra < other.ra
 
     @classmethod
