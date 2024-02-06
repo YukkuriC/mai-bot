@@ -6,8 +6,10 @@ HERE = os.path.dirname(__file__)
 def tryUseIntKey(obj):
     if not isinstance(obj, dict):
         return obj
-    return {(int(k) if k.lstrip('-').isdigit() else k): v
-            for k, v in obj.items()}
+    num_key = all(k.lstrip('-').isdigit() for k in obj)
+    if not num_key:
+        return obj
+    return {int(k): v for k, v in obj.items()}
 
 
 class CacheEntry:
