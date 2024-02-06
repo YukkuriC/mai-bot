@@ -122,7 +122,7 @@ async def handle_message(input_msg: str):
         tmp_path = os.path.join(tempfile.gettempdir(), 'tmp.html')
         with open(tmp_path, 'w', encoding='utf-8') as f:
             print(HTML_TEMPLATE.format(msg_body, input_msg), file=f)
-        os.system(tmp_path)
+        os.system(f"start {tmp_path}")
 
     # pure text
     else:
