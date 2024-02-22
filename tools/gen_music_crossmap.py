@@ -21,7 +21,7 @@ for music in proberData:
         a2p[aquaId] = proberId
     else:
         same_ids.add(proberId)
-        print('same:', proberId, proberTitle)
+        # print('same:', proberId, proberTitle)
 
 for mid in aquaData['diff'].keys():
     if mid not in a2p and mid not in same_ids:
