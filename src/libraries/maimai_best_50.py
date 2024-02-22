@@ -207,19 +207,69 @@ class DrawBest(DrawBestBase):
 
 
 async def generate50(payload: Dict) -> Tuple[Optional[Image.Image], bool]:
+    return generate50_img(*(await generate50_query(payload)))
+
+
+async def generate50_query(payload: Dict) -> Tuple[Optional[Image.Image], bool]:
     async with aiohttp.request("POST", "https://www.diving-fish.com/api/maimaidxprober/query/player", json=payload) as resp:
         if resp.status == 400:
             return None, 400
         if resp.status == 403:
             return None, 403
-        sd_best = BestList(35)
-        dx_best = BestList(15)
         obj = await resp.json()
-        dx: List[Dict] = obj["charts"]["dx"]
-        sd: List[Dict] = obj["charts"]["sd"]
-        for c in sd:
-            sd_best.push(ChartInfo.from_json(c))
-        for c in dx:
-            dx_best.push(ChartInfo.from_json(c))
-        pic = DrawBest(sd_best, dx_best, obj["nickname"]).getDir()
-        return pic, 0
+        return obj, 0
+
+
+def generate50_img(obj, status) -> Tuple[Optional[Image.Image], bool]:
+    if status == 400:
+        return None, 400
+    if status == 403:
+        return None, 403
+    sd_best = BestList(35)
+    dx_best = BestList(15)
+    dx: List[Dict] = obj["charts"]["dx"]
+    sd: List[Dict] = obj["charts"]["sd"]
+    for c in sd:
+        sd_best.push(ChartInfo.from_json(c))
+    for c in dx:
+        dx_best.push(ChartInfo.from_json(c))
+    pic = DrawBest(sd_best, dx_best, obj["nickname"]).getDir()
+    return pic, 0
+
+
+def generate50_diff(source, target):
+    sd_map, dx_map = {}, {}
+    sd_base = dx_base = 1e10
+    for sd_chart in source["charts"]["sd"]:
+        sd_base = min(sd_base, sd_chart["ra"])
+        sd_map[sd_chart["song_id"], sd_chart["level_index"]] = sd_chart["ra"]
+    for dx_chart in source["charts"]["dx"]:
+        dx_base = min(dx_base, dx_chart["ra"])
+        dx_map[dx_chart["song_id"], dx_chart["level_index"]] = dx_chart["ra"]
+
+    sd_best = BestList(35)
+    dx_best = BestList(15)
+
+    for sd_chart in target["charts"]["sd"]:
+        ra_key = sd_chart["song_id"], sd_chart["level_index"]
+        delta_score = min(sd_chart["ra"] - sd_map.get(ra_key, 0),
+                          sd_chart["ra"] - sd_base)
+        if delta_score <= 0:
+            continue
+        chart = ChartInfo.from_json(sd_chart)
+        chart.ra = delta_score
+        sd_best.push(chart)
+
+    for dx_chart in target["charts"]["dx"]:
+        if dx_chart["ra"] <= dx_base:
+            continue
+        ra_key = dx_chart["song_id"], dx_chart["level_index"]
+        delta_score = min(dx_chart["ra"] - dx_map.get(ra_key, 0),
+                          dx_chart["ra"] - dx_base)
+        if delta_score <= 0:
+            continue
+        chart = ChartInfo.from_json(dx_chart)
+        chart.ra = delta_score
+        dx_best.push(chart)
+
+    return DrawBest(sd_best, dx_best, target["nickname"]).getDir()

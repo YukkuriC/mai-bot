@@ -7,7 +7,7 @@ from src.libraries.tool import hash
 from src.libraries.maimaidx_music import *
 from src.libraries.image import *
 from src.libraries.maimai_best_40 import generate
-from src.libraries.maimai_best_50 import generate50
+from src.libraries.maimai_best_50 import generate50, generate50_diff, generate50_query
 import re
 
 
@@ -318,4 +318,52 @@ async def _(event: Event, message: Message = CommandArg()):
             MessageSegment("image", {
                 "file": f"base64://{str(image_to_base64(img), encoding='utf-8')}"
             })
+        ]))
+
+
+best_50_diff = on_command('b50_diff', priority=10, block=True)
+
+
+@best_50_diff.handle()
+async def _(event: Event, message: Message = CommandArg()):
+    targets = str(message).strip().split()
+    try:
+        payloads = []
+        assert len(targets) >= 2
+        for id in targets[:2]:
+            if id.isdigit():
+                payloads.append({"qq": id, "b50": True})
+            else:
+                payloads.append({"username": id, "b50": True})
+    except:
+        return await best_50_diff.finish("Usage: b50_diff <id1> <id2>")
+
+    datas = []
+    for payload in payloads:
+        obj, success = await generate50_query(payload)
+        if success > 0:
+            fail_id = payload['qq'] if 'qq' in payload else payload['username']
+            if success == 400:
+                return await best_50_diff.finish(
+                    f"{fail_id}: 未找到此玩家，请确保此玩家的用户名和查分器中的用户名相同。")
+            elif success == 403:
+                return await best_50_diff.finish(f"{fail_id}: 该用户禁止了其他人获取数据。")
+        else:
+            datas.append(obj)
+
+    await best_50_diff.send(
+        Message([
+            MessageSegment(
+                "image", {
+                    "file":
+                    f"base64://{str(image_to_base64(generate50_diff(*datas)), encoding='utf-8')}"
+                })
+        ]))
+    await best_50_diff.send(
+        Message([
+            MessageSegment(
+                "image", {
+                    "file":
+                    f"base64://{str(image_to_base64(generate50_diff(*datas[::-1])), encoding='utf-8')}"
+                })
         ]))
