@@ -8,11 +8,8 @@ import aiohttp
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from src.libraries.maimaidx_music import get_cover_len5_id
 
-from .maimai_rating_base import BestList, ChartInfo, DrawBestBase
-
-scoreRank = 'D C B BB BBB A AA AAA S S+ SS SS+ SSS SSS+'.split(' ')
-combo = ' FC FC+ AP AP+'.split(' ')
-diffs = 'Basic Advanced Expert Master Re:Master'.split(' ')
+from .maimai_rating_base import BestList, ChartInfo, DrawBestBase, \
+                                scoreRank, combo, diffs
 
 
 class DrawBest(DrawBestBase):

@@ -2,6 +2,10 @@ import os
 from PIL import Image
 from src.libraries.maimaidx_music import get_cover_len5_id, total_list
 
+scoreRank = 'D C B BB BBB A AA AAA S S+ SS SS+ SSS SSS+'.split(' ')
+combo = ' FC FC+ AP AP+'.split(' ')
+diffs = 'Basic Advanced Expert Master Re:Master'.split(' ')
+
 
 def computeRa(ds: float, achievement: float) -> int:
     baseRa = 22.4
@@ -63,6 +67,12 @@ def computeRa_b40(ds: float, achievement: float) -> int:
         baseRa = 13.5
 
     return int(ds * (min(100.5, achievement) / 100) * baseRa)
+
+
+def build_prober_payload(username: str):
+    if username.isdigit():
+        return {'qq': username, 'b50': True}
+    return {'username': username, 'b50': True}
 
 
 class ChartInfo(object):

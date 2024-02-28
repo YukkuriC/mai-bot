@@ -6,6 +6,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from src.libraries.tool import hash
 from src.libraries.maimaidx_music import *
 from src.libraries.image import *
+from src.libraries.maimai_rating_base import build_prober_payload
 from src.libraries.maimai_best_40 import generate
 from src.libraries.maimai_best_50 import generate50, generate50_diff, generate50_query
 import re
@@ -278,12 +279,9 @@ best_40_pic = on_command('b40')
 @best_40_pic.handle()
 async def _(event: Event, message: Message = CommandArg()):
     username = str(message).strip()
-    if username == "":
-        payload = {'qq': str(event.get_user_id())}
-    elif username.isdigit():
-        payload = {'qq': username, 'b50':True}
-    else:
-        payload = {'username': username}
+    if not username:
+        return await best_40_pic.finish('usage: b40 <id|qq>')
+    payload = build_prober_payload(username)
     img, success = await generate(payload)
     if success == 400:
         await best_40_pic.send("未找到此玩家，请确保此玩家的用户名和查分器中的用户名相同。")
@@ -302,12 +300,9 @@ best_50_pic = on_command('b50')
 @best_50_pic.handle()
 async def _(event: Event, message: Message = CommandArg()):
     username = str(message).strip()
-    if username == "":
-        payload = {'qq': str(event.get_user_id()),'b50':True}
-    elif username.isdigit():
-        payload = {'qq': username, 'b50':True}
-    else:
-        payload = {'username': username,'b50':  True}
+    if not username:
+        return await best_40_pic.finish('usage: b50 <id|qq>')
+    payload = build_prober_payload(username)
     img, success = await generate50(payload)
     if success == 400:
         await best_50_pic.send("未找到此玩家，请确保此玩家的用户名和查分器中的用户名相同。")
@@ -321,7 +316,7 @@ async def _(event: Event, message: Message = CommandArg()):
         ]))
 
 
-best_50_diff = on_command('b50_diff', priority=10, block=True)
+best_50_diff = on_command('diff_b50')
 
 
 @best_50_diff.handle()
@@ -331,10 +326,7 @@ async def _(event: Event, message: Message = CommandArg()):
         payloads = []
         assert len(targets) >= 2
         for id in targets[:2]:
-            if id.isdigit():
-                payloads.append({"qq": id, "b50": True})
-            else:
-                payloads.append({"username": id, "b50": True})
+            payloads.append(build_prober_payload(id))
     except:
         return await best_50_diff.finish("Usage: b50_diff <id1> <id2>")
 
