@@ -1,5 +1,7 @@
 from nonebot import on_command, on_regex
 from nonebot.params import CommandArg, EventMessage
+from src.libraries.maimai_best_50 import generate50_diff, generate50_query
+from src.libraries.maimai_rating_base import build_prober_payload
 from src.libraries import aqua, aqua_best
 from src.libraries.image import *
 from cache import CacheShelve
@@ -78,5 +80,41 @@ async def _(message=EventMessage()):
             MessageSegment("image", {
                 "file":
                 f"base64://{str(image_to_base64(raw), encoding='utf-8')}"
+            })
+        ]))
+
+
+aqua_diff = on_command('diff_aqua')
+
+
+@aqua_diff.handle()
+async def _(message: Message = CommandArg()):
+    username = str(message).strip()
+    if not username:
+        return await aqua_diff.finish('usage: aqua_diff <id|qq>')
+    payload = build_prober_payload(username)
+
+    data_prober, success = await generate50_query(payload)
+    if success > 0:
+        fail_id = payload['qq'] if 'qq' in payload else payload['username']
+        if success == 400:
+            return await aqua_diff.finish(
+                f"{fail_id}: 未找到此玩家，请确保此玩家的用户名和查分器中的用户名相同。")
+        elif success == 403:
+            return await aqua_diff.finish(f"{fail_id}: 该用户禁止了其他人获取数据。")
+
+    host = getAqua()
+    user = getUserId()
+    data_aqua = await aqua_best.GetAquaDiffDataForProber(
+        host, user, aqua_diff.send)
+    if not data_aqua:
+        return await aqua_diff.finish('get aqua data failed')
+
+    img = generate50_diff(data_prober, data_aqua)
+    await aqua_diff.send(
+        Message([
+            MessageSegment("image", {
+                "file":
+                f"base64://{str(image_to_base64(img), encoding='utf-8')}"
             })
         ]))

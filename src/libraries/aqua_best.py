@@ -1,8 +1,9 @@
 from .aqua import queryMusic, queryNickname
-from .maimai_rating_base import ChartInfo, BestList
+from .maimai_rating_base import ChartInfo, BestList, computeRa
 from cache import CacheEntry
 from .maimai_best_50 import DrawBest
 from .maimai_best_40 import DrawBest as DrawBest_B40
+from .maimaidx_music import total_list as prober_list
 import re
 
 
@@ -223,3 +224,79 @@ async def GenBest(host, userId, is_b40, sender=NULL_AWAIT, extra_args=[]):
 
     pic = drawing(*data, await GetUserNickname(host, userId)).getDir()
     return pic
+
+
+_score_rev = [
+    'd', 'c', 'b', 'bb', 'bbb', 'a', 'aa', 'aaa', 's', 'sp', 'ss', 'ssp',
+    'sss', 'sssp'
+]
+_fc_rev = ['', 'fc', 'fcp', 'ap', 'app']
+
+
+async def GetAquaDiffDataForProber(host, userId, sender=NULL_AWAIT):
+    # check metadata
+    if not (crossMap := GetCrossMap()):
+        await sender("missing crossmap, run tools/gen_music_crossmap.py first")
+        return
+    if not (aquaData := GetAquaData()):
+        await sender("missing aqua data, run tools/gen_aqua_music_map.py first"
+                     )
+        return
+
+    # fetch raw data
+    data, status = await queryMusic(host, userId)
+    if status != 200:
+        await sender(f"query userId={userId} in {host} error: {status}")
+        return
+
+    lstOld, lstNew = [], []
+    for unit in data:
+        aquaId = unit['musicId']
+        if aquaId in crossMap['aOnly']: continue
+        proberId = crossMap['a2p'].get(aquaId, aquaId)
+        lvl_idx = unit['level']
+
+        try:
+            prober_info = prober_list.by_id(str(proberId))
+            ds = prober_info['ds'][lvl_idx]
+            is_new = prober_info['basic_info']['is_new']
+        except:
+            await sender(f"no diff info for music#{aquaId} level#{lvl_idx}")
+            continue
+
+        chart = ChartInfo(
+            idNum=proberId,
+            diff=lvl_idx,
+            tp='DX' if aquaId >= 10000 else 'SD',
+            achievement=unit['achievement'] * 1e-4,
+            comboId=unit['comboStatus'],
+            scoreId=unit['scoreRank'],
+            title=prober_info['title'],
+            ds=ds,
+            lv=str(int(ds)) + ('+' if ds - int(ds) - 0.7 >= -1e-5 else ''),
+        )
+        rating = computeRa(ds, unit['achievement'] * 1e-4)
+        # aliases
+        data = {
+            'song_id': proberId,
+            'level_index': lvl_idx,
+            'diff': lvl_idx,
+            'ra': rating,
+            'achievements': unit['achievement'] * 1e-4,
+            'ds': ds,
+            'title': prober_info['title'],
+            'level':
+            str(int(ds)) + ('+' if ds - int(ds) - 0.7 >= -1e-5 else ''),
+            'rate': _score_rev[unit['scoreRank']],
+            'fc': _fc_rev[unit['comboStatus']],
+            'type': 'DX' if aquaId >= 10000 else 'SD',
+        }
+        (lstNew if is_new else lstOld).append(data)
+
+    return {
+        'charts': {
+            'dx': lstNew,
+            'sd': lstOld,
+        },
+        'nickname': await GetUserNickname(host, userId)
+    }
