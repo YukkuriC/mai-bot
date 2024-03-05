@@ -93,14 +93,7 @@ class DrawBest(DrawBestBase):
             recBase = recBase.point(lambda p: int(p * 0.8))
             img.paste(recBase, (self.COLOUMS_IMG[j] + 5, self.ROWS_IMG[i + 1] + 5))
             img.paste(temp, (self.COLOUMS_IMG[j] + 4, self.ROWS_IMG[i + 1] + 4))
-        for num in range(len(sdBest), sdBest.size):
-            i = num // 7
-            j = num % 7
-            temp = Image.open(self.cover_dir + f'01000.png').convert('RGB')
-            temp = self._resizePic(temp, itemW / temp.size[0])
-            temp = temp.crop((0, (temp.size[1] - itemH) / 2, itemW, (temp.size[1] + itemH) / 2))
-            temp = temp.filter(ImageFilter.GaussianBlur(1))
-            img.paste(temp, (self.COLOUMS_IMG[j] + 4, self.ROWS_IMG[i + 1] + 4))
+        # 不画空占位了
         for num in range(0, len(dxBest)):
             i = num // 3
             j = num % 3
@@ -139,14 +132,7 @@ class DrawBest(DrawBestBase):
             recBase = recBase.point(lambda p: int(p * 0.8))
             img.paste(recBase, (self.COLOUMS_IMG[j + 8] + 5, self.ROWS_IMG[i + 1] + 5))
             img.paste(temp, (self.COLOUMS_IMG[j + 8] + 4, self.ROWS_IMG[i + 1] + 4))
-        for num in range(len(dxBest), dxBest.size):
-            i = num // 3
-            j = num % 3
-            temp = Image.open(self.cover_dir + f'01000.png').convert('RGB')
-            temp = self._resizePic(temp, itemW / temp.size[0])
-            temp = temp.crop((0, (temp.size[1] - itemH) / 2, itemW, (temp.size[1] + itemH) / 2))
-            temp = temp.filter(ImageFilter.GaussianBlur(1))
-            img.paste(temp, (self.COLOUMS_IMG[j + 8] + 4, self.ROWS_IMG[i + 1] + 4))
+        # nope
 
     def draw(self):
         splashLogo = Image.open(self.pic_dir + 'UI_CMN_TabTitle_MaimaiTitle_Ver214.png').convert('RGBA')
