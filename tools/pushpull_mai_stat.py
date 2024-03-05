@@ -56,11 +56,23 @@ if 'steps':
                 "extNum1": 0
             }
 
-        def setMaxHelper(record, key, newv):
+        def setMaxHelper(record, key, newv, output=None, displayMapper=None):
             oldv = record[key]
             setv = max(record[key], newv)
             record[key] = setv
-            return oldv != setv
+            ret = oldv != setv
+            if output != None:
+                try:
+                    oldd = displayMapper[oldv]
+                except:
+                    oldd = oldv
+                try:
+                    setd = displayMapper[setv]
+                except:
+                    setd = setv
+                if ret:
+                    output.append(f'- {key}: {oldd} -> {setd}')
+            return ret
 
         def assignProberToAqua(proberData, aquaData):
             infoMap = ensure_cache('aquaMusicData', 'gen_aqua_music_map')
@@ -88,21 +100,25 @@ if 'steps':
                 recordAqua = mapper[mkey]
 
                 # update
+                output = []
                 setter = partial(setMaxHelper, recordAqua)
                 update = \
-                    setter("achievement", int(recordProber["achievements"] * 10000)) \
-                    | setter("deluxscoreMax", recordProber["dxScore"]) \
-                    | setter("comboStatus", fcmap.index(recordProber["fc"])) \
-                    | setter("syncStatus", fsmap.index(recordProber["fs"])) \
-
-                # not important & often sync fail
-                setter("scoreRank", rankmap.index(recordProber["rate"]))
+                    setter("scoreRank", rankmap.index(recordProber["rate"]), output, rankmap) \
+                    | setter("achievement", int(recordProber["achievements"] * 10000), output) \
+                    | setter("deluxscoreMax", recordProber["dxScore"], output) \
+                    | setter("comboStatus", fcmap.index(recordProber["fc"]), output, fcmap) \
+                    | setter("syncStatus", fsmap.index(recordProber["fs"]), output, fsmap)
 
                 # log
-                if (create or update) and diff >= 3:
-                    print(
-                        f"""{'Created' if create else 'Updated'}: {title} {diffmap[diff]} {recordAqua["achievement"]/10000}"""
-                    )
+                if diff >= 3:
+                    if create:
+                        print(
+                            f"""\033[92mCreated: {title} {diffmap[diff]} {recordAqua["achievement"]/10000}\033[0m"""
+                        )
+                    elif update:
+                        print(f"""\033[93mUpdated: {title} {diffmap[diff]}\033[0m""")
+                        for line in output:
+                            print(line)
 
     # 4. upload to aqua
     async def uploadAquaData(obj):
