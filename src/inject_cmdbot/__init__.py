@@ -24,4 +24,7 @@ async def io_main():
 
 def run():
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    asyncio.run(io_main())
+    try:
+        asyncio.run(io_main())
+    except ValueError:
+        pass
