@@ -1,7 +1,7 @@
 import glob, os, json
 from xml.dom.minidom import parse
 
-from cfg_reader import OPTION_ROOT
+from cfg_reader import OPTION_ROOT, OPTION_ROOT2
 from cache_access import CacheEntry
 
 sdMap, dxMap, versionMap, versionNameMap = {}, {}, [], []
@@ -58,11 +58,12 @@ def readMusicFile(path):
         diffList[i] = level + levelSub / 10
 
 
-for path in glob.glob(fr'{OPTION_ROOT}/*/musicVersion/*/MusicVersion.xml'):
-    readVersionFile(path)
+for option_root in [OPTION_ROOT, OPTION_ROOT2]:
+    for path in glob.glob(fr'{option_root}/*/musicVersion/*/MusicVersion.xml'):
+        readVersionFile(path)
 
-for path in glob.glob(fr'{OPTION_ROOT}/*/Music/*/Music.xml'):
-    readMusicFile(path)
+    for path in glob.glob(fr'{option_root}/*/Music/*/Music.xml'):
+        readMusicFile(path)
 
 CacheEntry.dump(
     'aquaMusicData', {

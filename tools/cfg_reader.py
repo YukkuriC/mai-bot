@@ -1,6 +1,7 @@
 import json, os
 
 OPTION_ROOT = 'path to A??? folders'
+OPTION_ROOT2 = 'path to H??? folders'
 PROBER_USERNAME = PROBER_PASSWORD = 'prober login user'
 AQUA_HOST = 'localhost'
 AQUA_INNER_ID = 'read from export json link'
@@ -13,6 +14,7 @@ with open(os.path.join(BASE_DIR, 'CONFIG.JSON'), 'r', encoding='utf-8') as f:
 
 __all__ = [
     "OPTION_ROOT",
+    "OPTION_ROOT2",
     "PROBER_USERNAME",
     "PROBER_PASSWORD",
     "AQUA_HOST",
