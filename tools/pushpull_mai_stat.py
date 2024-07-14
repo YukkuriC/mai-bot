@@ -3,6 +3,7 @@ import asyncio
 import json
 from functools import partial
 import os
+import colorama
 
 BASE_DIR = os.path.dirname(__file__)
 os.chdir(BASE_DIR)
@@ -39,7 +40,7 @@ if 'steps':
     # 3. merge data
     if 'transfer data':
         fcmap = ',fc,fcp,ap,app'.split(',')
-        fsmap = ',fs,fsp,fsd,fsdp'.split(',')
+        fsmap = ',fs,fsp,fsd,fsdp,sync'.split(',')
         rankmap = 'd,c,b,bb,bbb,a,aa,aaa,s,sp,ss,ssp,sss,sssp'.split(',')
         diffmap = 'Basic,Advanced,Expert,Master,Re:Master'.split(',')
 
@@ -113,10 +114,12 @@ if 'steps':
                 if diff >= 3:
                     if create:
                         print(
-                            f"""\033[92mCreated: {title} {diffmap[diff]} {recordAqua["achievement"]/10000}\033[0m"""
+                            f"""{colorama.Fore.YELLOW}Created: {title} {diffmap[diff]} {recordAqua["achievement"]/10000}{colorama.Style.RESET_ALL}"""
                         )
                     elif update:
-                        print(f"""\033[93mUpdated: {title} {diffmap[diff]}\033[0m""")
+                        print(
+                            f"""{colorama.Fore.GREEN}Updated: {title} {diffmap[diff]}{colorama.Style.RESET_ALL}"""
+                        )
                         for line in output:
                             print(line)
 
