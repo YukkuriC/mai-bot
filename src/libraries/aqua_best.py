@@ -148,7 +148,7 @@ if 'parse extra args':
         for a in aliases:
             FIELD_ALIAS_MAP[a] = orig
 
-    PREDICATE_REGEX = re.compile(r'([\w\.+]+)([<>=]+)([\w\.+]+)')
+    PREDICATE_REGEX = re.compile(r'([\w\.+]+)([<>=!]+)([\w\.+]+)')
 
     LEVEL_TRANS = lambda lvStr: float(lvStr.replace('+', '.5'))
 
