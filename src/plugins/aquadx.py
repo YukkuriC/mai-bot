@@ -84,7 +84,7 @@ async def _(message=EventMessage()):
         ]))
 
 
-aqua_diff = on_command('diff_aqua')
+aqua_diff = on_command('diff_aqua', aliases=['aqua_diff'], priority=114514)
 
 
 @aqua_diff.handle()

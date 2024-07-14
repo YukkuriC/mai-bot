@@ -301,7 +301,7 @@ best_50_pic = on_command('b50')
 async def _(event: Event, message: Message = CommandArg()):
     username = str(message).strip()
     if not username:
-        return await best_40_pic.finish('usage: b50 <id|qq>')
+        return await best_50_pic.finish('usage: b50 <id|qq>')
     payload = build_prober_payload(username)
     img, success = await generate50(payload)
     if success == 400:
