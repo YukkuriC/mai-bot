@@ -39,6 +39,7 @@ tools [list|help]: 列出可用命令
         os.system(f'python {tool_name}.py')
     except:
         pass
+    input('Done.')
     try:
         exit()
     except:
