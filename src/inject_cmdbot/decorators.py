@@ -14,7 +14,9 @@ def on_command(base: str, **kw):
                 return True
         return False
 
-    return CommandMatcher(match, kw)
+    matcher = CommandMatcher(match, kw)
+    matcher.help_text = f'指令: {" / ".join(templates)}'
+    return matcher
 
 
 def on_regex(pattern: str, **kw):
@@ -22,7 +24,9 @@ def on_regex(pattern: str, **kw):
     def match(msg: str):
         return re.match(pattern, msg)
 
-    return CommandMatcher(match, kw)
+    matcher = CommandMatcher(match, kw)
+    matcher.help_text = f'正则: {pattern}'
+    return matcher
 
 
 __all__ = [i for i in locals().keys() if i.startswith('on_')]

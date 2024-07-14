@@ -1,4 +1,5 @@
 import inspect, os, tempfile
+from collections import defaultdict
 
 from .params import CommandArg, EventMessage
 
@@ -14,10 +15,15 @@ class CommandMatcher:
         self.block = kwargs.get('block', True)
 
         self.appended = False
+        self.help_text = '寄'
 
     def handle(self):
 
         def receiver(func):
+            exec_frame = inspect.stack()[1]
+            filename = os.path.basename(exec_frame.filename)
+            HELP_MAP[filename].append(self.help_text)
+
             sig = inspect.signature(func)
             func.kwSet = set(sig.parameters)
             arg_msg = sig.parameters.get('message')
@@ -65,6 +71,7 @@ RULESETS: list[CommandMatcher] = []
 DUMMY_EVENT = None
 DUMMY_BOT = None
 DUMMY_STATE = {}
+HELP_MAP = defaultdict(list)
 
 HTML_TEMPLATE = '''<html>
 <head><meta charset="utf-8"><title>{1}</title></head>
