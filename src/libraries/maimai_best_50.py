@@ -230,6 +230,12 @@ def generate50_diff(source, target):
         dx_base = min(dx_base, dx_chart["ra"])
         dx_map[dx_chart["song_id"], dx_chart["level_index"]] = dx_chart["ra"]
 
+    # 怎么会有人b50填不满的（恼
+    if len(source["charts"]["dx"]) < 15:
+        dx_base = 0
+    if len(source["charts"]["sd"]) < 35:
+        sd_base = 0
+
     sd_best = BestList(35)
     dx_best = BestList(15)
 
