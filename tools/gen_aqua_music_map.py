@@ -25,6 +25,9 @@ def readVersionFile(path):
 
 def readMusicFile(path):
     musicId = int(os.path.basename(os.path.dirname(path))[5:])
+    if musicId > 20000:
+        # TODO 宴谱以后再说
+        return
     isDx = musicId // 10000 > 0
     doc = parse(path).documentElement
     id2, title = parseStrIdNode(doc.getElementsByTagName('name')[0])

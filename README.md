@@ -14,6 +14,7 @@
         * lv`[比较符号][等级编号]`
         * ds`[比较符号][数字]`
     * [x] 筛选FC/AP状态（fc/fc+/fcp/ap/ap+/app）
+* [ ] 查询宴谱成绩
 
 ## Step 1. 安装 Python
 

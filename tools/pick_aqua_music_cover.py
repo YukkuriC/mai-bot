@@ -12,7 +12,8 @@ if not os.path.isdir(TARGET_DIR):
     os.makedirs(TARGET_DIR, exist_ok=1)
 
 crossMap = ensure_cache('crossMap', 'gen_music_crossmap')
-missing_ids = set(i % 10000 for i in crossMap['aOnly'])
+missing_ids = set(i % 10000 for i in crossMap['aOnly'] if i < 20000)
+# TODO 宴谱以后再说
 
 cover_pattern = fr'{OPTION_ROOT}/*/AssetBundleImages/jacket/ui_jacket_*.ab'
 all_covers = glob.glob(cover_pattern)

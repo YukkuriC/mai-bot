@@ -79,7 +79,9 @@ async def GetAquaLists(host,
         try:
             ds = aquaData['diff'][aquaId][lvl_idx]
         except:
-            await sender(f"no diff info for music#{aquaId} level#{lvl_idx}")
+            if 'debug' in flags:
+                await sender(f"no diff info for music#{aquaId} level#{lvl_idx}"
+                             )
             continue
 
         chart = ChartInfo(
