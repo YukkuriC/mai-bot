@@ -60,6 +60,8 @@ if 'steps':
         def setMaxHelper(record, key, newv, output=None, displayMapper=None):
             oldv = record[key]
             setv = max(record[key], newv)
+            if record == 'syncStatus' and setv == 5 and oldv > 0:
+                return
             record[key] = setv
             ret = oldv != setv
             if output != None:
