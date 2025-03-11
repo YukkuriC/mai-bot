@@ -18,21 +18,18 @@ if 'steps':
     # 1. pull from dxprober
     async def fetchProber(username=PROBER_USERNAME, password=PROBER_PASSWORD):
         async with aiohttp.ClientSession() as session:
-            async with session.post(
-                    "https://www.diving-fish.com/api/maimaidxprober/login",
-                    json={
-                        'username': username,
-                        'password': password
-                    }) as login:
+            async with session.post("https://www.diving-fish.com/api/maimaidxprober/login",
+                                    json={
+                                        'username': username,
+                                        'password': password
+                                    }) as login:
                 print(await login.json())
-            async with session.get(
-                    "https://www.diving-fish.com/api/maimaidxprober/player/records"
-            ) as resp:
+            async with session.get("https://www.diving-fish.com/api/maimaidxprober/player/records") as resp:
                 return await resp.json()
 
     # 2. pull from aqua
-    async def fetchAqua(dbId=AQUA_INNER_ID):
-        loc = f'http://{AQUA_HOST}/api/game/maimai2/export?aimeId={dbId}'
+    async def fetchAqua():
+        loc = f'{AQUA_HOST}/aqua/api/v2/game/mai2/export?token={AQUA_INNER_ID}'
         async with aiohttp.ClientSession() as session:
             async with session.get(loc) as login:
                 return await login.json()
@@ -122,16 +119,14 @@ if 'steps':
                             f"""{colorama.Fore.YELLOW}Created: {title} {diffmap[diff]} {recordAqua["achievement"]/10000}{colorama.Style.RESET_ALL}"""
                         )
                     elif update:
-                        print(
-                            f"""{colorama.Fore.GREEN}Updated: {title} {diffmap[diff]}{colorama.Style.RESET_ALL}"""
-                        )
+                        print(f"""{colorama.Fore.GREEN}Updated: {title} {diffmap[diff]}{colorama.Style.RESET_ALL}""")
                         for line in output:
                             print(line)
 
     # 4. upload to aqua
     async def uploadAquaData(obj):
         async with aiohttp.ClientSession() as session:
-            loc = f'http://localhost/api/game/maimai2/import'
+            loc = f'{AQUA_HOST}/aqua/api/v2/game/mai2/import?token={AQUA_INNER_ID}'
             async with session.post(loc, json=obj) as upload:
                 print(await upload.json())
 
@@ -164,13 +159,13 @@ if 'stages':
 # merge workflow
 async def main():
     print('Step 1: fetch DXProber'.center(30, '='))
-    step1 = await fetchProber()
+    await stage1()
     print('Step 2: fetch Aqua'.center(30, '='))
-    step2 = await fetchAqua()
+    await stage2()
     print('Step 3: merge data'.center(30, '='))
-    assignProberToAqua(step1, step2)
+    await stage3()
     print('Step 4: upload to aqua'.center(30, '='))
-    await uploadAquaData(step2)
+    await stage4()
 
 
 if __name__ == '__main__':
