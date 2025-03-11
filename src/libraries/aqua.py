@@ -20,7 +20,7 @@ async def queryAime(aqua_host: str, aimeId: str):
 
 
 async def queryMusic(aqua_host: str, userId: str):
-    loc = f'http://{aqua_host}/Maimai2Servlet/Maimai2Servlet/GetUserMusicApi'
+    loc = f'http://{aqua_host}/Maimai2Servlet/GetUserMusicApi'
     async with poster(loc, {
             "userId": userId,
             "nextIndex": 0,
@@ -36,7 +36,7 @@ async def queryMusic(aqua_host: str, userId: str):
 
 
 async def queryNickname(aqua_host: str, userId: str):
-    loc = f'http://{aqua_host}/Maimai2Servlet/Maimai2Servlet/GetUserPreviewApi'
+    loc = f'http://{aqua_host}/Maimai2Servlet/GetUserPreviewApi'
     async with poster(loc, {
             "userId": userId,
             "segaIdAuthKey": "",

@@ -49,7 +49,9 @@ async def _(message=CommandArg()):
             await h_aime.send(f'No saved user id')
         return
     if len(args) == 1 and args[0] != 'help':
-        data = await aqua.queryAime(getAqua(), aimeId=args[0])
+        # TODO: aime server
+        # data = await aqua.queryAime(getAqua(), aimeId=args[0])
+        data = {'extId': args[0]}
         if data and (code := data.get('extId')):
             CacheShelve.set(K_USERID, code)
             return await h_aime.finish(f'User id saved: {code}')
@@ -75,6 +77,9 @@ async def _(message=EventMessage()):
                                   is_b40=all_args[0] == 'aqua_b40',
                                   sender=h_b40_b50.send,
                                   extra_args=all_args[1:])
+    if not raw:
+        return h_b40_b50.finish(f'invalid img: {raw}')
+
     await h_b40_b50.send(
         Message([
             MessageSegment("image", {
