@@ -29,7 +29,7 @@ async def _(bot: Bot, event: Event, state: T_State, message=CommandArg()):
     if not tool_valid:
         tools_lister = '\n'.join(all_tools)
         return await tools_handler.finish(f'''usage:
-tools [list|help]: 列出可用命令
+run_tool [list|help]: 列出可用命令
 可用命令：
 {tools_lister}
 ''')
