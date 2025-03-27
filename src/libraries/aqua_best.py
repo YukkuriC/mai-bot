@@ -1,4 +1,4 @@
-from .aqua import queryMusic, queryNickname
+from .aqua import *
 from .maimai_rating_base import ChartInfo, BestList, computeRa
 from cache import CacheEntry
 from .maimai_best_50 import DrawBest
@@ -37,9 +37,7 @@ def GetAquaData():
     return raw
 
 
-async def GetAquaLists(host,
-                       userId,
-                       old=35,
+async def GetAquaLists(old=35,
                        new=15,
                        new_id=-1,
                        sender=NULL_AWAIT,
@@ -54,15 +52,11 @@ async def GetAquaLists(host,
         await sender("missing crossmap, run tools/gen_music_crossmap.py first")
         return
     if not (aquaData := GetAquaData()):
-        await sender("missing aqua data, run tools/gen_aqua_music_map.py first"
-                     )
+        await sender("missing aqua data, run tools/gen_aqua_music_map.py first")
         return
 
     # fetch raw data
-    data, status = await queryMusic(host, userId)
-    if status != 200:
-        await sender(f"query userId={userId} in {host} error: {status}")
-        return
+    data = await fetchMusic()
 
     # map all to prober format
     lstOld, lstNew = [], []
@@ -121,15 +115,6 @@ async def GetAquaLists(host,
         blNew.data = sorted(lstNew, reverse=1)[:new]
 
     return blOld, blNew
-
-
-async def GetUserNickname(host, userId):
-    try:
-        raw = await queryNickname(host, userId)
-        print(raw)
-        return raw['userName']
-    except:
-        return str(userId)
 
 
 if 'parse extra args':
@@ -209,22 +194,20 @@ if 'parse extra args':
         return flags, predicates
 
 
-async def GenBest(host, userId, is_b40, sender=NULL_AWAIT, extra_args=[]):
+async def GenBest(is_b40, sender=NULL_AWAIT, extra_args=[]):
     flags, predicates = _splitArgs(extra_args)
     kwargs, drawing = {}, DrawBest
     if is_b40:
         kwargs['old'] = 25
         drawing = DrawBest_B40
-    data = await GetAquaLists(host,
-                              userId,
-                              sender=sender,
+    data = await GetAquaLists(sender=sender,
                               flags=flags,
                               predicates=predicates,
                               **kwargs)
     if not data:
         return data
 
-    pic = drawing(*data, await GetUserNickname(host, userId)).getDir()
+    pic = drawing(*data, await fetchNickname()).getDir()
     return pic
 
 
@@ -235,7 +218,7 @@ _score_rev = [
 _fc_rev = ['', 'fc', 'fcp', 'ap', 'app']
 
 
-async def GetAquaDiffDataForProber(host, userId, sender=NULL_AWAIT):
+async def GetAquaDiffDataForProber(sender=NULL_AWAIT):
     # check metadata
     if not (crossMap := GetCrossMap()):
         await sender("missing crossmap, run tools/gen_music_crossmap.py first")
@@ -246,10 +229,7 @@ async def GetAquaDiffDataForProber(host, userId, sender=NULL_AWAIT):
         return
 
     # fetch raw data
-    data, status = await queryMusic(host, userId)
-    if status != 200:
-        await sender(f"query userId={userId} in {host} error: {status}")
-        return
+    data = await fetchMusic()
 
     lstOld, lstNew = [], []
     for unit in data:
@@ -300,5 +280,5 @@ async def GetAquaDiffDataForProber(host, userId, sender=NULL_AWAIT):
             'dx': lstNew,
             'sd': lstOld,
         },
-        'nickname': await GetUserNickname(host, userId)
+        'nickname': await fetchNickname()
     }
